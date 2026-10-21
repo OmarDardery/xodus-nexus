@@ -1,4 +1,4 @@
-{ lib, buildNpmPackage, electron, coreutils, bash, makeWrapper, makeDesktopItem, copyDesktopItems, src }:
+{ lib, buildNpmPackage, electron, coreutils, bash, nodejs, makeWrapper, makeDesktopItem, copyDesktopItems, src }:
 
 buildNpmPackage {
   pname = "xodus-nexus";
@@ -18,11 +18,17 @@ buildNpmPackage {
     # Synthetic test fixtures often use #!/bin/sh; patch their generated scripts
     # if the next build still fails rather than bypassing tests.
   '';
+  # Fixture scripts use /bin/sh and /usr/bin/env, unavailable in a Nix sandbox.
+  # patchShebangs rewrites shebangs in the temporary build tree.
+  preBuild = ''
+    patchShebangs src/main
+  '';
   ELECTRON_SKIP_BINARY_DOWNLOAD = "1";
 
   # Compile the renderer and Electron main process, without creating an AppImage.
   buildPhase = ''
     runHook preBuild
+    export PATH="${coreutils}/bin:${bash}/bin:${nodejs}/bin:$PATH"
     npm run build
     runHook postBuild
   '';
