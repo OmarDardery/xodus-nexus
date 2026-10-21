@@ -22,17 +22,17 @@ let
       mesa
       freetype
       fontconfig
-      xorg.libX11
-      xorg.libXext
-      xorg.libXrandr
-      xorg.libXcursor
-      xorg.libXi
-      xorg.libXrender
-      xorg.libXfixes
-      xorg.libXcomposite
-      xorg.libXdamage
-      xorg.libXinerama
-      xorg.libxcb
+      libx11
+      libxext
+      libxrandr
+      libxcursor
+      libxi
+      libxrender
+      libxfixes
+      libxcomposite
+      libxdamage
+      libxinerama
+      libxcb
       wayland
       coreutils
       bash
@@ -57,9 +57,9 @@ let
       libdrm
       freetype
       fontconfig
-      xorg.libX11
-      xorg.libXext
-      xorg.libxcb
+      libx11
+      libxext
+      libxcb
     ];
     runScript = "${electron}/bin/electron";
   };
