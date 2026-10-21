@@ -6,7 +6,7 @@ buildNpmPackage {
   inherit src;
 
   # Replace after the first build reports the correct npm dependency hash.
-  npmDepsHash = lib.fakeHash;
+  npmDepsHash = "sha256-pzVbtFPUAG5tZohuD6cG2+bfK5dtfOP2rVkCav9XRtY=";
   npmFlags = [ "--ignore-scripts" ];
 
   nativeBuildInputs = [ makeWrapper copyDesktopItems ];
