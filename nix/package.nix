@@ -1,15 +1,23 @@
-{ lib, buildNpmPackage, electron, makeWrapper, makeDesktopItem, copyDesktopItems, src }:
+{ lib, buildNpmPackage, electron, coreutils, bash, makeWrapper, makeDesktopItem, copyDesktopItems, src }:
 
 buildNpmPackage {
   pname = "xodus-nexus";
   version = (builtins.fromJSON (builtins.readFile (src + "/package.json"))).version;
   inherit src;
 
-  # Replace after the first build reports the correct npm dependency hash.
   npmDepsHash = "sha256-pzVbtFPUAG5tZohuD6cG2+bfK5dtfOP2rVkCav9XRtY=";
   npmFlags = [ "--ignore-scripts" ];
 
-  nativeBuildInputs = [ makeWrapper copyDesktopItems ];
+  nativeBuildInputs = [ makeWrapper copyDesktopItems coreutils bash ];
+
+  # Upstream subprocess tests assume /bin/sh, /bin/echo and a conventional PATH.
+  # Nix builders have no /bin; patch fixture paths in the unpacked copy only.
+  postPatch = ''
+    substituteInPlace src/main/game-shortcuts.test.ts \\
+      --replace-fail "'/bin/echo'" "'${coreutils}/bin/echo'"
+    # Synthetic test fixtures often use #!/bin/sh; patch their generated scripts
+    # if the next build still fails rather than bypassing tests.
+  '';
   ELECTRON_SKIP_BINARY_DOWNLOAD = "1";
 
   # Compile the renderer and Electron main process, without creating an AppImage.
