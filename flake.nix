@@ -9,11 +9,15 @@
       forAllSystems = f: nixpkgs.lib.genAttrs systems
         (system: f (import nixpkgs { inherit system; }));
     in {
-      packages = forAllSystems (pkgs: {
-        default = pkgs.callPackage ./nix/package.nix {
-          src = self;
-        };
-      });
+      packages = forAllSystems (pkgs:
+        let nexusRuntime = pkgs.callPackage ./nix/runtime.nix { };
+        in {
+          nexus-runtime = nexusRuntime;
+          default = pkgs.callPackage ./nix/package.nix {
+            src = self;
+            inherit nexusRuntime;
+          };
+        });
       apps = forAllSystems (pkgs: {
         default = {
           type = "app";
