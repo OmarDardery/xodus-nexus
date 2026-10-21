@@ -1,41 +1,43 @@
-# NixOS source-build experiment
+# Nix flake
 
-This is an **initial, unverified** source-build package for the Nexus launcher.
-The backend and game runtime are separate components and are not packaged here.
+This flake builds the Xodus Nexus Electron launcher from source and packages the
+official prebuilt Nexus Proton runtime separately. Supported system: x86_64-linux.
 
-## Test
+## Usage
 
 ```sh
-nix build .#default --show-trace -L
-nix run .#default
+nix build .#nexus-runtime -L
+nix build . -L
+nix run .
 ```
 
-The first build is expected to fail because `npmDepsHash` is deliberately set to
-`lib.fakeHash`. Copy the **got:** SRI hash from the fixed-output dependency
-hash mismatch into `nix/package.nix`, then rebuild.
+The launcher is built with `buildNpmPackage` and runs its upstream type checks
+and tests. The npm dependency hash and runtime archive hash are pinned.
 
-Note: upstream pins Electron 44.8.0 in npm, while this flake currently uses
-the Electron version available from nixpkgs. Check that the runtime Electron
-version is compatible before submitting upstream. The Nix build may also
-expose missing native dependencies or packaging assumptions.
+The launcher runs in a private FHS environment for compatibility with the
+downloaded upstream CLI and bundled Proton/Wine executables. No system-wide
+`programs.nix-ld` setting is required. Graphics drivers still come from the host.
 
-## Installing in a host flake
+The official runtime is a fixed-output derivation; update its version, release
+URL and hash in `nix/runtime.nix` to change releases. The launcher receives
+`XODUS_NEXUS_WINE` and uses that binary when validation succeeds. If validation
+fails, it falls back to its existing managed runtime discovery. Other launcher
+features, including CLI backend downloads, continue to use upstream behavior.
 
-Add:
+## Install from another flake
 
-```nexus.url = "github:OmarDardery/xodus-nexus/feat/nix-flake";
+```nix
+inputs.nexus.url = "github:domsvoboda/xodus-nexus";
 ```
 
-Then in a NixOS module with access to `inputs`:
+Then include `inputs.nexus.packages.${pkgs.stdenv.hostPlatform.system}.default`
+in `environment.systemPackages` or `home.packages`.
 
-```nixpkgs.overlays = [ ];
-environment.systemPackages = [
-  inputs.nexus.packages.${pkgs.stdenv.hostPlatform.system}.default
-];
-```
+## Notes
 
-For Home Manager, use `home.packages` instead.
-
-`nix flake update nexus` advances the source pin when this repository is
-used as a flake input. Npm lockfile changes may require updating the Nix
-dependency hash in the package source.
+- The launcher uses the nixpkgs Electron version, which may differ from the
+  version pinned by upstream's npm package.
+- The packaged Proton runtime is an upstream prebuilt binary, not a source build.
+- Runtime validation and game execution should be tested on real NixOS systems
+  with working GPU drivers; successful Nix evaluation alone is insufficient.
+- Commit `flake.lock` to pin the nixpkgs revision for reproducible builds.
