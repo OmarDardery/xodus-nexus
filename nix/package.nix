@@ -13,7 +13,7 @@ buildNpmPackage {
   # Adapt dynamically generated test fixtures to the Nix sandbox.
   postPatch = ''
     find src -type f \( -name '*.test.ts' -o -name '*.test.tsx' \) -print0 |
-      while IFS= read -r -d '' file; do
+      while IFS= read -r -d "" file; do
         substituteInPlace "$file" \
           --replace-warn '#!/usr/bin/env node' '#!${nodejs}/bin/node' \
           --replace-warn '#!/bin/sh' '#!${bash}/bin/bash'
