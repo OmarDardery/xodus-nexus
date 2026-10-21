@@ -18,12 +18,16 @@
             inherit nexusRuntime;
           };
         });
-      apps = forAllSystems (pkgs: {
-        default = {
-          type = "app";
-          program = "${self.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/xodus-nexus";
-        };
-      });
+      apps = forAllSystems (pkgs:
+        let
+          launcher = {
+            type = "app";
+            program = "${pkgs.lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.default}";
+          };
+        in {
+          default = launcher;
+          xodus-nexus = launcher;
+        });
       checks = forAllSystems (pkgs: {
         package = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
       });
