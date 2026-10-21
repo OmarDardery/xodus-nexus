@@ -13,7 +13,7 @@ buildNpmPackage {
   # Upstream subprocess tests assume /bin/sh, /bin/echo and a conventional PATH.
   # Nix builders have no /bin; patch fixture paths in the unpacked copy only.
   postPatch = ''
-    substituteInPlace src/main/game-shortcuts.test.ts \\
+    substituteInPlace src/main/game-shortcuts.test.ts \
       --replace-fail "'/bin/echo'" "'${coreutils}/bin/echo'"
     # Synthetic test fixtures often use #!/bin/sh; patch their generated scripts
     # if the next build still fails rather than bypassing tests.
