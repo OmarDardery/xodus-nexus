@@ -1,17 +1,65 @@
-{ lib, buildNpmPackage, electron, buildFHSEnv, coreutils, bash, nodejs, makeWrapper, makeDesktopItem, copyDesktopItems, src }:
+{ lib, buildNpmPackage, electron, buildFHSEnv, coreutils, bash, nodejs, git, gh, gnutar, xz, gzip, findutils, gnugrep, gnused, which, makeWrapper, makeDesktopItem, copyDesktopItems, src }:
 
 let
-  # A private FHS runtime for upstream-downloaded xodus-cli binaries.
-  # Unlike nix-ld this needs no system-wide NixOS configuration.
+  # Keep upstream's downloaded CLI and Proton/Wine runtime inside a private
+  # Linux filesystem layout; no system-wide nix-ld configuration is required.
   runtime = buildFHSEnv {
     name = "xodus-nexus-runtime";
-    targetPkgs = pkgs: with pkgs; [
+    targetPkgs = pkgs: (with pkgs; [
       stdenv.cc.cc.lib
       openssl
       dbus
       zlib
       glib
       libxcrypt
+      libpulseaudio
+      alsa-lib
+      pipewire
+      libudev-zero
+      libdrm
+      libglvnd
+      vulkan-loader
+      mesa
+      freetype
+      fontconfig
+      xorg.libX11
+      xorg.libXext
+      xorg.libXrandr
+      xorg.libXcursor
+      xorg.libXi
+      xorg.libXrender
+      xorg.libXfixes
+      xorg.libXcomposite
+      xorg.libXdamage
+      xorg.libXinerama
+      xorg.libxcb
+      wayland
+      coreutils
+      bash
+      git
+      gh
+      gnutar
+      xz
+      gzip
+      findutils
+      gnugrep
+      gnused
+      which
+    ]);
+    multiPkgs = pkgs: with pkgs; [
+      stdenv.cc.cc.lib
+      zlib
+      libglvnd
+      vulkan-loader
+      mesa
+      alsa-lib
+      libpulseaudio
+      libdrm
+      freetype
+      fontconfig
+      xorg.libX11
+      xorg.libXext
+      xorg.libxcb
     ];
     runScript = "${electron}/bin/electron";
   };
