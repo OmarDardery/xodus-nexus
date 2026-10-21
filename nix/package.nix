@@ -1,5 +1,21 @@
-{ lib, buildNpmPackage, electron, coreutils, bash, nodejs, makeWrapper, makeDesktopItem, copyDesktopItems, src }:
+{ lib, buildNpmPackage, electron, buildFHSEnv, coreutils, bash, nodejs, makeWrapper, makeDesktopItem, copyDesktopItems, src }:
 
+let
+  # A private FHS runtime for upstream-downloaded xodus-cli binaries.
+  # Unlike nix-ld this needs no system-wide NixOS configuration.
+  runtime = buildFHSEnv {
+    name = "xodus-nexus-runtime";
+    targetPkgs = pkgs: with pkgs; [
+      stdenv.cc.cc.lib
+      openssl
+      dbus
+      zlib
+      glib
+      libxcrypt
+    ];
+    runScript = "${electron}/bin/electron";
+  };
+in
 buildNpmPackage {
   pname = "xodus-nexus";
   version = (builtins.fromJSON (builtins.readFile (src + "/package.json"))).version;
@@ -38,7 +54,7 @@ buildNpmPackage {
     mkdir -p "$out/share/xodus-nexus" "$out/bin" "$out/share/icons/hicolor/256x256/apps"
     cp -r dist dist-electron assets package.json "$out/share/xodus-nexus/"
     cp assets/icon.png "$out/share/icons/hicolor/256x256/apps/xodus-nexus.png"
-    makeWrapper "${electron}/bin/electron" "$out/bin/xodus-nexus" \
+    makeWrapper "${runtime}/bin/xodus-nexus-runtime" "$out/bin/xodus-nexus" \
       --add-flags "$out/share/xodus-nexus"
     runHook postInstall
   '';
