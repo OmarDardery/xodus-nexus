@@ -82,6 +82,8 @@ buildNpmPackage {
           --replace-warn '#!/usr/bin/env node' '#!${nodejs}/bin/node' \
           --replace-warn '#!/bin/sh' '#!${bash}/bin/bash'
       done
+    substituteInPlace nix/test-echo \
+      --replace-fail '#!/bin/sh' '#!${bash}/bin/bash'
     substituteInPlace src/main/game-wrapper.test.ts \
       --replace-fail ':/usr/bin:/bin' ':${coreutils}/bin:${bash}/bin'
     substituteInPlace src/main/game-shortcuts.test.ts \
