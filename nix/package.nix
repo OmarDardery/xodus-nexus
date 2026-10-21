@@ -10,18 +10,18 @@ buildNpmPackage {
 
   nativeBuildInputs = [ makeWrapper copyDesktopItems coreutils bash ];
 
-  # Upstream subprocess tests assume /bin/sh, /bin/echo and a conventional PATH.
-  # Nix builders have no /bin; patch fixture paths in the unpacked copy only.
+  # Adapt dynamically generated test fixtures to the Nix sandbox.
   postPatch = ''
+    find src -type f \( -name '*.test.ts' -o -name '*.test.tsx' \) -print0 |
+      while IFS= read -r -d '' file; do
+        substituteInPlace "$file" \
+          --replace-warn '#!/usr/bin/env node' '#!${nodejs}/bin/node' \
+          --replace-warn '#!/bin/sh' '#!${bash}/bin/bash'
+      done
+    substituteInPlace src/main/game-wrapper.test.ts \
+      --replace-fail ':/usr/bin:/bin' ':${coreutils}/bin:${bash}/bin'
     substituteInPlace src/main/game-shortcuts.test.ts \
-      --replace-fail "'/bin/echo'" "'${coreutils}/bin/echo'"
-    # Synthetic test fixtures often use #!/bin/sh; patch their generated scripts
-    # if the next build still fails rather than bypassing tests.
-  '';
-  # Fixture scripts use /bin/sh and /usr/bin/env, unavailable in a Nix sandbox.
-  # patchShebangs rewrites shebangs in the temporary build tree.
-  preBuild = ''
-    patchShebangs src/main
+      --replace-fail "'/bin/echo'" "'./nix/test-echo'"
   '';
   ELECTRON_SKIP_BINARY_DOWNLOAD = "1";
 
