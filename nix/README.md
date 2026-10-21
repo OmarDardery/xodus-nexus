@@ -8,7 +8,8 @@ official prebuilt Nexus Proton runtime separately. Supported system: x86_64-linu
 ```sh
 nix build .#nexus-runtime -L
 nix build . -L
-nix run .
+nix run .                 # launch from this checkout
+nix run .#xodus-nexus     # equivalent explicit app
 ```
 
 The launcher is built with `buildNpmPackage` and runs its upstream type checks
