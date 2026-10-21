@@ -1,4 +1,4 @@
-{ lib, buildNpmPackage, electron, buildFHSEnv, coreutils, bash, nodejs, git, gh, gnutar, xz, gzip, findutils, gnugrep, gnused, which, makeWrapper, makeDesktopItem, copyDesktopItems, src }:
+{ lib, buildNpmPackage, electron, buildFHSEnv, coreutils, bash, nodejs, git, gh, gnutar, xz, gzip, findutils, gnugrep, gnused, which, makeWrapper, makeDesktopItem, copyDesktopItems, src, nexusRuntime }:
 
 let
   # Keep upstream's downloaded CLI and Proton/Wine runtime inside a private
@@ -103,6 +103,7 @@ buildNpmPackage {
     cp -r dist dist-electron assets package.json "$out/share/xodus-nexus/"
     cp assets/icon.png "$out/share/icons/hicolor/256x256/apps/xodus-nexus.png"
     makeWrapper "${runtime}/bin/xodus-nexus-runtime" "$out/bin/xodus-nexus" \
+      --set XODUS_NEXUS_WINE "${nexusRuntime}/files/bin/wine" \
       --add-flags "$out/share/xodus-nexus"
     runHook postInstall
   '';
