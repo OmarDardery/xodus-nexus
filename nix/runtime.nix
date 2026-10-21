@@ -9,8 +9,7 @@ stdenvNoCC.mkDerivation {
   inherit version;
   src = fetchurl {
     url = "https://github.com/domsvoboda/xodus-nexus/releases/download/runtime-${version}/${archive}";
-    # Replace with the hash printed by the first nix build.
-    hash = lib.fakeHash;
+    hash = "sha256-G4IXlaMJNWVwsM2vfx6Fp55RYVM2iz54389QGdAALD4=";
   };
   nativeBuildInputs = [ gnutar xz ];
   dontConfigure = true;
